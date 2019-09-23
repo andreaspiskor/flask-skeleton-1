@@ -56,3 +56,36 @@ def vstupnitest():
         dotaz = db.session.query(Vysledky.username,func.count(Vysledky.hodnoce).label("suma")).group_by(Vysledky.username)
         return render_template('public/vysledekvystup.tmpl', data=dotaz)
     return render_template('public/vstupnitest.tmpl', form=form)
+
+@blueprint.route('/nactenijson', methods=['GET','POST'])
+def nactenijson():
+    from flask import jsonify
+    import requests, os
+    os.environ['NO_PROXY'] = '127.0.0.1'
+    proxies = {
+        "http": None,
+        "https": "https://192.168.1.1.800",
+    }
+    response = requests.get("http://192.168.10.1:5000/nactenijson")
+    json_res = response.json()
+    data = []
+    for radek in json_res["list"]:
+       data.append(radek["main"]["temp"])
+    return render_template("public/dataprint.tmpl",data=data)
+
+
+
+
+from flask import Flask
+from flask import render_template
+from datetime import time
+
+app = Flask(__name__)
+
+@blueprint.route("/simple_chart", methods=['GET','POST'])
+def chart():
+    legend = 'Monthly Data'
+    labels = ["January", "February", "March", "April", "May", "June", "July", "August"]
+    values = [10, 9, 8, 7, 6, 4, 7, 8]
+    return render_template('public/chart.tmpl', values=values, labels=labels, legend=legend)
+
